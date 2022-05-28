@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from flask import request
-from datetime import date
+from datetime import datetime
 from functools import wraps
 from flask import abort
 from forms import RegisterForm,LoginForm
@@ -131,13 +131,12 @@ def add_new_post():
             body=form.body.data,
             img_url=form.img_url.data,
             author=current_user.name,
-            date=date.today().strftime("%B %d, %Y")
+            date=datetime.now().strftime("%B %d, %Y at %H:%M")
         )
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for("get_all_posts"))
     return render_template("make-post.html", form=form)
-
 
 
 @app.route("/edit-post",methods=['POST','GET'])
@@ -160,7 +159,7 @@ def edit_post():
         db.session.commit()
         return redirect(url_for("show_post", post_id=post.id))
 
-    return render_template("make-post.html", form=edit_form)
+    return render_template("make-post.html", form=edit_form,is_edit=True)
 
 
 @app.route("/delete/<int:post_id>")
