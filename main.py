@@ -144,7 +144,7 @@ def add_new_post():
 # @admin_only
 def edit_post():
     post_id=request.args.get('post_id')
-    post = BlogPost.query.get(post_id)
+    post = BlogPost.query.filter_by(id=post_id).first()
     edit_form = CreatePostForm(
         title=post.title,
         subtitle=post.subtitle,
@@ -153,10 +153,10 @@ def edit_post():
     )
     if edit_form.validate_on_submit():
         post.title = edit_form.title.data
-        post.subtitle = edit_form.subtitle.data
-        post.img_url = edit_form.img_url.data
-        post.author = current_user
-        post.body = edit_form.body.data
+        post.subtitle = edit_form.data.get('subtitle')
+        post.img_url = edit_form.data.get('img_url')
+        post.author = current_user.name
+        post.body = edit_form.data.get('body')
         db.session.commit()
         return redirect(url_for("show_post", post_id=post.id))
 
