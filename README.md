@@ -1,6 +1,6 @@
 # blog_flask
 ## blog website with some functionality
-visit here -> **https://blogg-i8r0.onrender.com/** <br />
+visit here -> **https://blogflask123456.herokuapp.com/** <br />
 if you want to log in as admin, use this:<br />
 name: admin<br />
 email: admin@gmail.com<br />
