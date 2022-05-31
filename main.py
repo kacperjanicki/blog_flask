@@ -1,7 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
-from datetime import date
+from flask import request
+from datetime import datetime
 from functools import wraps
 from flask import abort
 from forms import RegisterForm,LoginForm
@@ -105,9 +106,9 @@ def logout():
     return redirect('/')
 
 
-@app.route("/post/<int:post_id>")
-def show_post(post_id):
-    requested_post = BlogPost.query.get(post_id)
+@app.route("/post")
+def show_post():
+    requested_post = BlogPost.query.get(request.args.get('post_id'))
     print(requested_post)
     return render_template("post.html", post=requested_post)
 
@@ -130,7 +131,7 @@ def add_new_post():
             body=form.body.data,
             img_url=form.img_url.data,
             author=current_user.name,
-            date=date.today().strftime("%B %d, %Y")
+            date=datetime.now().strftime("%B %d, %Y at %H:%M")
         )
         db.session.add(new_post)
         db.session.commit()
@@ -138,28 +139,27 @@ def add_new_post():
     return render_template("make-post.html", form=form)
 
 
-
-@app.route("/edit-post/<int:post_id>")
-@admin_only
-def edit_post(post_id):
-    post = BlogPost.query.get(post_id)
+@app.route("/edit-post",methods=['POST','GET'])
+# @admin_only
+def edit_post():
+    post_id=request.args.get('post_id')
+    post = BlogPost.query.filter_by(id=post_id).first()
     edit_form = CreatePostForm(
         title=post.title,
         subtitle=post.subtitle,
         img_url=post.img_url,
-        author=current_user.author,
         body=post.body
     )
     if edit_form.validate_on_submit():
         post.title = edit_form.title.data
-        post.subtitle = edit_form.subtitle.data
-        post.img_url = edit_form.img_url.data
-        post.author = edit_form.author.data
-        post.body = edit_form.body.data
+        post.subtitle = edit_form.data.get('subtitle')
+        post.img_url = edit_form.data.get('img_url')
+        post.author = current_user.name
+        post.body = edit_form.data.get('body')
         db.session.commit()
         return redirect(url_for("show_post", post_id=post.id))
 
-    return render_template("make-post.html", form=edit_form)
+    return render_template("make-post.html", form=edit_form,is_edit=True)
 
 
 @app.route("/delete/<int:post_id>")
